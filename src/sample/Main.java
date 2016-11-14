@@ -1,9 +1,6 @@
 package sample;
 
-import ClientClass.Contact;
-import ClientClass.LoginListener;
-import ClientClass.Model;
-import ClientClass.RegistrationListener;
+import Client.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -29,9 +26,11 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 
+
 public class Main extends Application {
     private static Stage primaryStageObj;
     Model model;
+
     public void SecondWind(Stage stageWindow) throws Exception {
 
         Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat.fxml"));
@@ -105,9 +104,9 @@ public class Main extends Application {
             public void handle(ActionEvent e) {
                 model.regRegistrationListener(new RegistrationListener(){
                     @Override
-                    public void handleEvent(int typeResponse) {
+                    public void handlerEvent(int typeResponse) {
                         switch(typeResponse){
-                            case 1:{
+                            case Report.SUCCESSFUL_REG:{
                                 Platform.runLater(()-> {
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Удача");
@@ -117,22 +116,22 @@ public class Main extends Application {
                                 });
                                 break;
                             }
-                            case 0:{
-                                Platform.runLater(()-> {
+                            case Report.THE_USER_EXIST:{
+                               // Platform.runLater(()-> {
                                     Alert alert = new Alert(Alert.AlertType.WARNING);
                                     alert.setTitle("Ошибка");
                                     alert.setHeaderText("Регистрация не удалась");
                                     //alert.setContentText("I have a great message for you!");
 
                                     alert.showAndWait();
-                                    });
+                                //});
                                 //err reg
                                 break;
                             }
 
                         }
-
                     }
+
                 });
 
                 Contact contact= new Contact();
@@ -195,11 +194,11 @@ public class Main extends Application {
 
             @Override
             public void handle(ActionEvent e) {
-                model.regLoginMeListener(new LoginListener(){
+                model.regLoginMeListener(new LoginMeListener(){
                     @Override
-                    public void handleEvent(int typeResponse) {
+                    public void handlerEvent(int typeResponse) {
                         switch(typeResponse) {
-                            case 1: {
+                            case Report.SUCCESSFUL_AUTH: {
                                 actiontarget.setText("");
                                 try{Stage stageWindow = new Stage();
                                     SecondWind(stageWindow);
@@ -207,9 +206,9 @@ public class Main extends Application {
                                 catch(Exception ex){System.out.println("Произошло ещё какое-то исключение"); }
                                 break;
                             }
-                            case 0:
+                            case Report.THE_USER_IS_NOT_EXIST:
                             {
-                                Platform.runLater(()-> {
+                               Platform.runLater(()-> {
                                     actiontarget.setText("Your data is incorrect!");
                                     actiontarget.setTextFill(Color.rgb(210, 39, 30));
                                 });
@@ -218,7 +217,7 @@ public class Main extends Application {
                         }
                     }
                 });
-                model.loginMe(userName.getText(),pwBox.getText());
+                model.loginMe(userTextField.getText(),pwBox.getText());
                 pwBox.clear();
             }});
         root.getChildren().add(grid);
