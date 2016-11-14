@@ -20,6 +20,7 @@ import javafx.scene.control.*;
 import javafx.scene.paint.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 import java.awt.*;
 
@@ -87,16 +88,18 @@ public class Main extends Application {
         grid.add(hbBtn, 0, 5);
         btnExit.setOnAction(new EventHandler<ActionEvent>() {
 
-        @Override
-        public void handle(ActionEvent e) {Stage stage = (Stage) btnExit.getScene().getWindow();
-            stage.close();
-        } });
+            @Override
+             public void handle(ActionEvent e) {
+                 Stage stage = (Stage) btnExit.getScene().getWindow();
+                 stage.close();
+             } });
         btnReg.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent e) {
                 //Послать клиенту данные о юзере
             } });
+
         root.getChildren().add(grid);
     }
 
@@ -171,6 +174,11 @@ public class Main extends Application {
         authObj(root);
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                System.out.println("Stage is closing");
+            }
+        });
     }
 
 
