@@ -1,6 +1,11 @@
 package sample;
 
+import ClientClass.Contact;
+import ClientClass.LoginListener;
+import ClientClass.Model;
+import ClientClass.RegistrationListener;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -8,8 +13,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,15 +24,14 @@ import javafx.scene.layout.GridPane;
 import javafx.geometry.*;
 import javafx.scene.text.*;
 import javafx.scene.control.*;
-import javafx.scene.paint.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-import java.awt.*;
 
 public class Main extends Application {
     private static Stage primaryStageObj;
+    Model model;
     public void SecondWind(Stage stageWindow) throws Exception {
 
         Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat.fxml"));
@@ -97,7 +103,43 @@ public class Main extends Application {
 
             @Override
             public void handle(ActionEvent e) {
-                //Послать клиенту данные о юзере
+                model.regRegistrationListener(new RegistrationListener(){
+                    @Override
+                    public void handleEvent(int typeResponse) {
+                        switch(typeResponse){
+                            case 1:{
+                                Platform.runLater(()-> {
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("Удача");
+                                    alert.setHeaderText("Регистрация прошла!");
+                                    //alert.setContentText("I have a great message for you!");
+                                    alert.showAndWait();
+                                });
+                                break;
+                            }
+                            case 0:{
+                                Platform.runLater(()-> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Ошибка");
+                                    alert.setHeaderText("Регистрация не удалась");
+                                    //alert.setContentText("I have a great message for you!");
+
+                                    alert.showAndWait();
+                                    });
+                                //err reg
+                                break;
+                            }
+
+                        }
+
+                    }
+                });
+
+                Contact contact= new Contact();
+                contact.login = userTextField.getText();
+                contact.name = nameTextField.getText();
+                contact.password = passTextField.getText();
+                model.registration(contact);
             } });
 
         root.getChildren().add(grid);
@@ -152,23 +194,38 @@ public class Main extends Application {
         btnAuth.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
-            public void handle(ActionEvent e) {actiontarget.setText("");
-               // if ((pwBox.getText().equals("admin")) && (userTextField.getText().equals("admin"))) {
-                    try{Stage stageWindow = new Stage();
-                        SecondWind(stageWindow);
+            public void handle(ActionEvent e) {
+                model.regLoginMeListener(new LoginListener(){
+                    @Override
+                    public void handleEvent(int typeResponse) {
+                        switch(typeResponse) {
+                            case 1: {
+                                actiontarget.setText("");
+                                try{Stage stageWindow = new Stage();
+                                    SecondWind(stageWindow);
+                                }
+                                catch(Exception ex){System.out.println("Произошло ещё какое-то исключение"); }
+                                break;
+                            }
+                            case 0:
+                            {
+                                Platform.runLater(()-> {
+                                    actiontarget.setText("Your data is incorrect!");
+                                    actiontarget.setTextFill(Color.rgb(210, 39, 30));
+                                });
+                                break;
+                            }
+                        }
                     }
-                    catch(Exception ex){System.out.println("Произошло ещё какое-то исключение"); }
-                 //} else{
-                    actiontarget.setText("Your data is incorrect!");
-                    actiontarget.setTextFill(Color.rgb(210, 39, 30));
-               // }
+                });
+                model.loginMe(userName.getText(),pwBox.getText());
                 pwBox.clear();
             }});
         root.getChildren().add(grid);
     }
     @Override
     public void start(Stage primaryStage) throws Exception{
-
+        model = new Model();
         Pane root = (Pane) FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Secure");
         authObj(root);
@@ -184,6 +241,7 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+
     }
     public static Stage getPrimaryStage() {
         return primaryStageObj;
