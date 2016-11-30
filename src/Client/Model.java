@@ -1,8 +1,8 @@
-package Client;
-
 /**
  * Created by IHaveSomeCookies on 17.10.2016.
  */
+package Client;
+
 public class Model implements ModelOnClientInterface {
 
     RegistrationListener registrationListener;
@@ -24,7 +24,8 @@ public class Model implements ModelOnClientInterface {
                     addContactListener.handlerEvent(null);
                 }
                 if (report.type == Report.FIND_CONTACT){ //если нашел контакт
-                    Contact contact = (Contact) report.data;
+                    //String strContact = (String ) report.data;
+                    Contact contact = (Contact) JSONCoder.decode((String) report.data,2);
                     addContactListener.handlerEvent(contact);
                 }
             }

@@ -33,12 +33,11 @@ public class Main extends Application {
 
     public void SecondWind(Stage stageWindow) throws Exception {
 
-        Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat.fxml"));
+        Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat2.fxml"));
         stageWindow.setTitle("Чат");
-        Scene scene = new Scene(rootSec, 600, 400);
+        Scene scene = new Scene(rootSec, 1040, 620);
         stageWindow.setScene(scene);
         stageWindow.show();
-        chatObj(rootSec);
     }
 
     public void RegWind(Stage stageWindow) throws Exception {
@@ -52,11 +51,6 @@ public class Main extends Application {
         regObj(rootReg);
     }
 
-    public void chatObj(Pane root)
-    {
-
-
-    }
 
     public void regObj(Pane root)
     {
@@ -198,9 +192,10 @@ public class Main extends Application {
                     @Override
                     public void handlerEvent(int typeResponse) {
                         switch(typeResponse) {
-                            case Report.SUCCESSFUL_AUTH: {
+                            case Report.SUCCESSFUL_AUTH : {
                                 actiontarget.setText("");
-                                try{Stage stageWindow = new Stage();
+                                try{
+                                    Stage stageWindow = new Stage();
                                     SecondWind(stageWindow);
                                 }
                                 catch(Exception ex){System.out.println("Произошло ещё какое-то исключение"); }
@@ -218,15 +213,21 @@ public class Main extends Application {
                     }
                 });
                 model.loginMe(userTextField.getText(),pwBox.getText());
+                try{Stage stageWindow = new Stage();
+                    SecondWind(stageWindow);
+                }
+                catch(Exception ex){System.out.println("окно чата"); }
                 pwBox.clear();
             }});
         root.getChildren().add(grid);
+
+
     }
     @Override
     public void start(Stage primaryStage) throws Exception{
-        model = new Model();
         Pane root = (Pane) FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Secure");
+        model = new Model();
         authObj(root);
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
