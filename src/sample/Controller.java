@@ -2,9 +2,7 @@ package sample;
 
 import Bubble.BubbleSpec;
 import Bubble.BubbledLabel;
-import Client.Contact;
-import Client.Message;
-import Client.Report;
+import Client.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,10 +24,11 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable{
-
+    Model model = new Model();
     @FXML private TextArea messageBox;
     @FXML private Label usernameLabel;
     @FXML private Label onlineCountLabel;
@@ -41,17 +40,23 @@ public class Controller implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         setUserList();
         setUsernameLabel("otorio");
 
     }
     public void sendButtonAction() throws IOException {
         Message msg = new Message();
-        msg.contact.name = this.usernameLabel.getText();
+        msg.contact = new Contact();
+        msg.contact.name = usernameLabel.getText();
+        msg.contact.name = "otorio";
         msg.text = messageBox.getText();
         if (!messageBox.getText().isEmpty()) {
             //посылка сообщ
-            setValueToLabel(msg);
+            try{
+                setValueToLabel(msg);
+            }
+            catch (Exception e){e.printStackTrace();}
             messageBox.clear();
         }
     }
@@ -92,32 +97,39 @@ public class Controller implements Initializable{
         yourMessages.setOnSucceeded(event -> chatPane.getItems().add(yourMessages.getValue()));
         try {
             if (msg.contact.name.equals(usernameLabel.getText())) {
-                Thread t2 = new Thread(yourMessages);
+                yourMessages.run();
+               /* Thread t2 = new Thread(yourMessages);
                 t2.setDaemon(true);
-                t2.start();
+                t2.start();*/
             } else {
-                Thread t = new Thread(othersMessages);
+                othersMessages.run();
+                /*Thread t = new Thread(othersMessages);
                 t.setDaemon(true);
-                t.start();
+                t.start();*/
             }
         }catch (Exception ex){
             System.out.println("потоки сообщ");}
     };
     public void setUsernameLabel(String username) {
         try {
-            this.usernameLabel.setText(username);
+            usernameLabel.setText(username);
 
         }catch (Exception ex){System.out.println("err присвоение логина");}
     }
     public void setUserList() {
-        ArrayList<String> users = new ArrayList<String>();
-        users.add("Dfcz");
-        users.add("Paha");
-        users.add("Vacz");
+        ArrayList<Contact> users = new ArrayList<Contact>();
+        model.regGetListContactListener(new GetListContactListener() {
+            @Override
+            public void handleEvent(ArrayList<Contact> contactArrayList) {
+                users.addAll(contactArrayList);
+            }
+        });
+        model.getListContact();
+
         Platform.runLater(() -> {
-            ObservableList<String> usersList = FXCollections.observableList(users);
+            ObservableList<Contact> usersList = FXCollections.observableList(users);
             userList.setItems(usersList);
-            //setOnlineLabel(String.valueOf(msg.getUserlist().size()));
+            setOnlineLabel(String.valueOf(users.size()));
         });
     }
     public void setOnlineLabel(String usercount) {
