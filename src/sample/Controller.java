@@ -82,8 +82,6 @@ public class Controller implements Initializable{
                         //del item
                     });
                     delmenu.getItems().add(deleteItem);
-
-
                     cell.textProperty().bind(cell.itemProperty());
                     cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
                         if (isNowEmpty) {
@@ -106,13 +104,17 @@ public class Controller implements Initializable{
         model.regFindContactsListener(new GetListContactListener() {
             @Override
             public void handleEvent(ArrayList<Contact> contactArrayList) {
+                if (contactArrayList.isEmpty())
+                { ObservableList<String> nouser = FXCollections.observableArrayList("Пользователей не найдено");
+                    userList.setItems(nouser); }
+                else{
                 ArrayList<String> log = new ArrayList<String>();
                 for(int i=0;i<contactArrayList.size();i++)
                 {
                     log.add(contactArrayList.get(i).login);
                 }
                 ObservableList<String> finuser = FXCollections.observableArrayList(log);
-                userList.setItems(finuser);
+                userList.setItems(finuser);}
             }
         });
             fanfare.addEventFilter(KeyEvent.KEY_PRESSED, ke -> {
@@ -121,9 +123,38 @@ public class Controller implements Initializable{
                     Contact fin = new Contact();
                     fin.login = fanfare.getText();
                     model.findContacts(fin);
-                    ObservableList<String> finuser = FXCollections.observableArrayList("aa","22");
-                    userList.setItems(finuser);
+                    //ObservableList<String> finuser = FXCollections.observableArrayList("aa","22");
+                    //userList.setItems(finuser);
                     ke.consume();
+                    userList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener()  {
+                        @Override
+                        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+
+                            userList.setCellFactory(lv -> {
+                                ListCell<String> cell = new ListCell<>();
+                                ContextMenu admenu = new ContextMenu();
+                                MenuItem addItem = new MenuItem();
+                                addItem.textProperty().bind(Bindings.format("Добавить \"%s\"", cell.itemProperty()));
+                                addItem.setOnAction(event -> {
+                                    Contact adcon = new Contact();
+                                    adcon.login = cell.getItem();
+                                    model.addContact(adcon);
+                                });
+                                admenu.getItems().add(addItem);
+                                cell.textProperty().bind(cell.itemProperty());
+                                cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                                    if (isNowEmpty) {
+                                        cell.setContextMenu(null);
+                                    } else {
+                                        cell.setContextMenu(admenu);
+                                    }
+                                });
+                                return cell ;
+                            });
+                            //System.out.println();
+                        }
+
+                    });
                 }
             });
 
