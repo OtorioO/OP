@@ -13,7 +13,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -194,11 +193,11 @@ public class Main extends Application {
                         switch(typeResponse) {
                             case Report.SUCCESSFUL_AUTH : {
                                 actiontarget.setText("");
-                                try{
+                                Platform.runLater(() -> {try{
                                     Stage stageWindow = new Stage();
                                     SecondWind(stageWindow);
                                 }
-                                catch(Exception ex){System.out.println("Произошло ещё какое-то исключение"); }
+                                catch(Exception ex){System.out.println("окно чата"); }});
                                 break;
                             }
                             case Report.THE_USER_IS_NOT_EXIST:
@@ -212,8 +211,8 @@ public class Main extends Application {
                         }
                     }
                 });
-                model.loginMe(userTextField.getText(),pwBox.getText());
-                try{Stage stageWindow = new Stage();
+                //model.loginMe(userTextField.getText(),pwBox.getText());
+              try{Stage stageWindow = new Stage();
                     SecondWind(stageWindow);
                 }
                 catch(Exception ex){System.out.println("окно чата"); }

@@ -4,6 +4,11 @@ import Bubble.BubbleSpec;
 import Bubble.BubbledLabel;
 import Client.*;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -15,16 +20,18 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable{
@@ -37,14 +44,100 @@ public class Controller implements Initializable{
     @FXML ListView statusList;
     @FXML BorderPane borderPane;
     @FXML ComboBox statusComboBox;
+    @FXML TextField fanfare;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         setUserList();
         setUsernameLabel("otorio");
+        findlist();
+        listenermenu();
+    }
+
+    public void listenermenu()
+    {
+
+        userList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener()  {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+
+                userList.setCellFactory(lv -> {
+                    ListCell<String> cell = new ListCell<>();
+                    ContextMenu delmenu = new ContextMenu();
+                    MenuItem addItem = new MenuItem();
+                    addItem.textProperty().bind(Bindings.format("Добавить \"%s\"", cell.itemProperty()));
+                    addItem.setOnAction(event -> {
+                        String item = cell.getItem();
+                        // code to edit item...
+                    });
+                    MenuItem deleteItem = new MenuItem();
+                    deleteItem.textProperty().bind(Bindings.format("Удалить \"%s\"", cell.itemProperty()));
+                    deleteItem.setOnAction(event -> {
+                        Contact delcon = new Contact();
+                        delcon.login = cell.getItem();
+                        model.deleteContact(delcon);
+                        userList.getItems().remove(cell.getItem());
+                        // System.out.println(cell.getItem());
+                        //del item
+                    });
+                    delmenu.getItems().add(deleteItem);
+
+
+                    cell.textProperty().bind(cell.itemProperty());
+                    cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                        if (isNowEmpty) {
+                            cell.setContextMenu(null);
+                        } else {
+                            cell.setContextMenu(delmenu);
+                        }
+                    });
+                    return cell ;
+                });
+                //System.out.println();
+            }
+
+        });
 
     }
+
+    public void findlist()
+    {
+        model.regFindContactsListener(new GetListContactListener() {
+            @Override
+            public void handleEvent(ArrayList<Contact> contactArrayList) {
+                ArrayList<String> log = new ArrayList<String>();
+                for(int i=0;i<contactArrayList.size();i++)
+                {
+                    log.add(contactArrayList.get(i).login);
+                }
+                ObservableList<String> finuser = FXCollections.observableArrayList(log);
+                userList.setItems(finuser);
+            }
+        });
+            fanfare.addEventFilter(KeyEvent.KEY_PRESSED, ke -> {
+                if (ke.getCode().equals(KeyCode.ENTER) & !fanfare.getText().isEmpty()) {
+                    System.out.println("пошел поиск");
+                    Contact fin = new Contact();
+                    fin.login = fanfare.getText();
+                    model.findContacts(fin);
+                    ObservableList<String> finuser = FXCollections.observableArrayList("aa","22");
+                    userList.setItems(finuser);
+                    ke.consume();
+                }
+            });
+
+        fanfare.addEventFilter(KeyEvent.KEY_PRESSED, ke -> {
+            if (ke.getCode().equals(KeyCode.BACK_SPACE) & fanfare.getText().isEmpty()) {
+                setUserList();
+
+            }
+        });
+
+
+    }
+
+
     public void sendButtonAction() throws IOException {
         Message msg = new Message();
         msg.contact = new Contact();
@@ -117,19 +210,22 @@ public class Controller implements Initializable{
         }catch (Exception ex){System.out.println("err присвоение логина");}
     }
     public void setUserList() {
-        ArrayList<Contact> users = new ArrayList<Contact>();
+        ArrayList<String> userslog = new ArrayList<String>();
         model.regGetListContactListener(new GetListContactListener() {
             @Override
             public void handleEvent(ArrayList<Contact> contactArrayList) {
-                users.addAll(contactArrayList);
+                for(int i=0;i<contactArrayList.size();i++)
+                {
+                    userslog.add(contactArrayList.get(i).login);
+                }
             }
         });
         model.getListContact();
-
         Platform.runLater(() -> {
-            ObservableList<Contact> usersList = FXCollections.observableList(users);
+            userslog.add("Pony");userslog.add("Top");userslog.add("Nope");
+            ObservableList<String> usersList = FXCollections.observableArrayList(userslog);
             userList.setItems(usersList);
-            setOnlineLabel(String.valueOf(users.size()));
+            setOnlineLabel(String.valueOf(userslog.size()));
         });
     }
     public void setOnlineLabel(String usercount) {
