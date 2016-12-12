@@ -1,4 +1,5 @@
 package Client;
+
 /**
  * Created by IHaveSomeCookies on 17.10.2016.
  */
@@ -10,7 +11,12 @@ public interface SubSystemMSGInterface {
     void registration(Contact contact, ReportListener reportListener);//+
     void findContact(Contact contact, ReportListener reportListener);//+
 
-    void registrListener(ReportListener reportListener);
-    void sendMessage(Message message, ReportListener reportListener);
+    void sendMessage(Message message, ReportListener reportListener);//06.12//+
+    void requestDialog(Contact contact, ReportListener reportListener);//06.12//+
+    void requestUpdateDialog(Contact contact,ReportListener reportListener);//06.12//
 
+    //11.12
+    void sendStatus(int status, ReportListener reportListener);
+    void requestMyContact(ReportListener reportListener);
+    void requestUpdateContacts(ReportListener reportListener);
 }

@@ -1,18 +1,25 @@
 package sample;
 
 import Client.*;
+import javafx.animation.Animation;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,12 +31,16 @@ import javafx.scene.layout.HBox;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+import javax.swing.*;
+import java.io.FileInputStream;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 
 public class Main extends Application {
     private static Stage primaryStageObj;
     Model model;
-
     public void SecondWind(Stage stageWindow) throws Exception {
 
         Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat2.fxml"));
@@ -37,6 +48,17 @@ public class Main extends Application {
         Scene scene = new Scene(rootSec, 1040, 620);
         stageWindow.setScene(scene);
         stageWindow.show();
+        stageWindow.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                model.setMyStatus(0, new UniversalListener() {
+                    @Override
+                    public void handlerEvent(int typeResponse) {
+
+                    }
+                });
+
+            }
+        });
     }
 
     public void RegWind(Stage stageWindow) throws Exception {
@@ -84,6 +106,7 @@ public class Main extends Application {
         hbBtn.getChildren().add(btnReg);
         hbBtn.getChildren().add(btnExit);
         grid.add(hbBtn, 0, 5);
+
         btnExit.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -104,7 +127,7 @@ public class Main extends Application {
                                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                     alert.setTitle("Удача");
                                     alert.setHeaderText("Регистрация прошла!");
-                                    //alert.setContentText("I have a great message for you!");
+
                                     alert.showAndWait();
                                 });
                                 break;
@@ -114,8 +137,6 @@ public class Main extends Application {
                                     Alert alert = new Alert(Alert.AlertType.WARNING);
                                     alert.setTitle("Ошибка");
                                     alert.setHeaderText("Регистрация не удалась");
-                                    //alert.setContentText("I have a great message for you!");
-
                                     alert.showAndWait();
                                 //});
                                 //err reg
@@ -126,18 +147,24 @@ public class Main extends Application {
                     }
 
                 });
-
+                if(!passTextField.getText().equals(passrepTextField))
+                {
+                    Label inft = new Label("Пароли не совпадают!");
+                    grid.add(inft,0,6);
+                }
+                else{
                 Contact contact= new Contact();
                 contact.login = userTextField.getText();
                 contact.name = nameTextField.getText();
                 contact.password = passTextField.getText();
-                model.registration(contact);
+
+                model.registration(contact);}
             } });
 
         root.getChildren().add(grid);
     }
 
-    public void authObj(Pane root)
+    public void authObj(Pane root, Stage primaryStage)
     {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -167,7 +194,7 @@ public class Main extends Application {
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().add(btnAuth);
         grid.add(hbBtn, 1, 4);
-        btnAuth.setTooltip(new Tooltip("Введите:"+"\n"+"admin "+"\n"+"admin"));
+        //btnAuth.setTooltip(new Tooltip("Введите:"+"\n"+"admin "+"\n"+"admin"));
 
         final Label actiontarget = new Label();
         grid.add(actiontarget, 1,5);
@@ -177,7 +204,10 @@ public class Main extends Application {
                                 @Override
                                 public void handle(ActionEvent e) {
                                     try{Stage stageWindowR = new Stage();
+                                        stageWindowR.initOwner(primaryStage);
+                                        stageWindowR.initModality(Modality.WINDOW_MODAL);
                                         RegWind(stageWindowR);
+
                                     }
                                     catch(Exception ex){}}
 
@@ -196,6 +226,7 @@ public class Main extends Application {
                                 Platform.runLater(() -> {try{
                                     Stage stageWindow = new Stage();
                                     SecondWind(stageWindow);
+                                    primaryStage.close();
                                 }
                                 catch(Exception ex){System.out.println("окно чата"); }});
                                 break;
@@ -211,12 +242,14 @@ public class Main extends Application {
                         }
                     }
                 });
-                //model.loginMe(userTextField.getText(),pwBox.getText());
-              try{Stage stageWindow = new Stage();
+                model.loginMe(userTextField.getText(),pwBox.getText());
+                ImageView im1=new ImageView(new Image(getClass().getResourceAsStream("spin.gif")));
+                grid.add(im1,1,6);
+              /*try{Stage stageWindow = new Stage();
                     SecondWind(stageWindow);
                 }
                 catch(Exception ex){System.out.println("окно чата"); }
-                pwBox.clear();
+                pwBox.clear();*/
             }});
         root.getChildren().add(grid);
 
@@ -227,7 +260,7 @@ public class Main extends Application {
         Pane root = (Pane) FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Secure");
         model = new Model();
-        authObj(root);
+        authObj(root, primaryStage);
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

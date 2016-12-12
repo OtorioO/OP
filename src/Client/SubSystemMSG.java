@@ -1,4 +1,5 @@
 package Client;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -44,14 +45,14 @@ public class SubSystemMSG implements SubSystemMSGInterface{
             }
             connection.setDoOutput(true);
 
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(stringReport);
-            wr.flush();
-            wr.close();
+            //DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+           // wr.writeBytes(stringReport);
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(stringReport.getBytes("UTF-8"));
+            outputStream.flush();
+            outputStream.close();
 
             connection.connect();
-
-            OutputStream outputStream = connection.getOutputStream();
 
             //Прослушка ответа+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -68,11 +69,74 @@ public class SubSystemMSG implements SubSystemMSGInterface{
             JSONstr = new String(answerData, "UTF-8");//
         }
         catch (Exception e) {
-
+            System.out.println(e.toString());
         }
         if(JSONstr == null)
             System.out.println("null str in private String aggregateConnectionWithSession(Report report)");
         return JSONstr;
+    }
+
+    //add 06.12
+    @Override
+    public void requestDialog(Contact contact, ReportListener reportListener) {
+        Report report = new Report();
+        report.data = contact;
+        report.type = Report.GIVE_MY_DIALOG; //запрос на получение диалога
+
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
+    }
+
+    @Override
+    public void requestUpdateDialog(Contact contact, ReportListener reportListener) {
+        Report report = new Report();
+        report.data = contact;
+        report.type = Report.UPDATE_MESSAGE; //запрос на получение диалога
+
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
+    }
+
+    @Override
+    public void sendStatus(int status, ReportListener reportListener) {
+        Report report = new Report();
+        Contact contact = new Contact();
+        contact.status = status;
+        report.data = contact;
+        report.type = Report.GIVE_ME_STATUS;
+
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
+    }
+
+    @Override
+    public void requestMyContact(ReportListener reportListener) {
+        Report report = new Report();
+        report.data = null;
+        report.type = Report.GIVE_ME_ABOUT;
+
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
+    }
+
+    @Override
+    public void requestUpdateContacts(ReportListener reportListener) {
+        Report report = new Report();
+        report.data = null;
+        report.type = Report.UPDATE_LIST;
+
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
     }
 
     @Override
@@ -205,12 +269,14 @@ public class SubSystemMSG implements SubSystemMSGInterface{
     }
 
     @Override
-    public void registrListener(ReportListener reportListener) {
-
-    }
-
-    @Override
     public void sendMessage(Message message, ReportListener reportListener) {
+        Report report = new Report();
+        report.data = message;
+        report.type = Report.MESSAGE;
 
+        String answerStr = aggregateConnectionWithSession(report);
+
+        Report answerReport = JSONCoder.decode(answerStr);
+        reportListener.handler(answerReport);
     }
 }
