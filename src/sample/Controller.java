@@ -20,7 +20,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -47,11 +46,11 @@ public class Controller implements Initializable{
     @FXML ListView chatPane;
     @FXML ListView statusList;
     @FXML BorderPane borderPane;
-    @FXML ComboBox statusComboBox;
     @FXML TextField fanfare;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         model.setMyStatus(1, new UniversalListener() {
             @Override
             public void handlerEvent(int typeResponse) {
@@ -59,14 +58,15 @@ public class Controller implements Initializable{
             }
         });
         setUserList();
-        setUsernameLabel("Misha");
         listenermenu();
         findlist();
+
 
     }
 
     public void listenermenu()
     {
+
         model.regGetListDialogListener(new GetListDialogListener() {
             @Override
             public void handlerEvent(ArrayList<Message> messageArrayList) {
@@ -342,6 +342,7 @@ public class Controller implements Initializable{
         model.regGetListContactListener(new GetListContactListener() {
             @Override
             public void handleEvent(ArrayList<Contact> contactArrayList) {
+
                 if(contactArrayList != null)
                 {
                 for(int i=0;i<contactArrayList.size();i++)
@@ -357,7 +358,7 @@ public class Controller implements Initializable{
 
         Platform.runLater(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {System.out.println("Таймер");
                 e.printStackTrace();
             }

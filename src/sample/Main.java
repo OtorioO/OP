@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBoxBuilder;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
 public class Main extends Application {
     private static Stage primaryStageObj;
     Model model;
+    Controller controller;
     public void SecondWind(Stage stageWindow) throws Exception {
 
         Pane rootSec = (Pane) FXMLLoader.load(getClass().getResource("/sample/chat2.fxml"));
@@ -172,7 +174,7 @@ public class Main extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        Text scenetitle = new Text("Welcome");
+        Text scenetitle = new Text("Вас приветствует Prox");
         scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(scenetitle, 0, 0, 2, 1);
 
@@ -221,12 +223,14 @@ public class Main extends Application {
                     @Override
                     public void handlerEvent(int typeResponse) {
                         switch(typeResponse) {
-                            case Report.SUCCESSFUL_AUTH : {
+                            case Report.SUCCESSFUL_AUTH :
+                                {
                                 actiontarget.setText("");
                                 Platform.runLater(() -> {try{
                                     Stage stageWindow = new Stage();
                                     SecondWind(stageWindow);
                                     primaryStage.close();
+                                    controller.setUsernameLabel(userTextField.getText());
                                 }
                                 catch(Exception ex){System.out.println("окно чата"); }});
                                 break;

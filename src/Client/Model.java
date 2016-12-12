@@ -289,7 +289,8 @@ public class Model implements ModelOnClientInterface {
         ReportListener reportListener = new ReportListener() {
             @Override
             public void handler(Report report) {
-                listener.handlerEvent(report.type,report.data);
+                listener.handlerEvent(report.type,JSONCoder.decode((String)report.data,Report.CONTACT));
+
             }
         };
         //Создание потока
